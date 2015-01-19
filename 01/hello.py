@@ -1,10 +1,16 @@
+import os
 import sys
 from django.conf import settings
 
+DEBUG = os.environ.get('DEBUG', 'on') == 'on'
+SECRECT_KEY=os.environ.get('SECRET_KEY', os.urandom(32))
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
+
 settings.configure(
-    DEBUG=True,
-    SECRET_KEY='worsekeyever',
+    DEBUG=DEBUG,
+    SECRET_KEY=SECRECT_KEY,
     ROOT_URLCONF=__name__,
+    ALLOWED_HOSTS=ALLOWED_HOSTS,
     MIDDLEWARE_CLASSES=(
         'django.middleware.common.CommonMiddleware',
         'django.middleware.csrf.CsrfViewMiddleware',
