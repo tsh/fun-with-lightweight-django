@@ -22,11 +22,13 @@ settings.configure(
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
     ),
 )
-
+import hashlib
+import os
 from django import forms
 from django.conf.urls import url
 from django.core.wsgi import get_wsgi_application
 from django.http import HttpResponse, HttpResponseBadRequest
+from django.views.decorators.http import etag
 
 
 class ImageForm(forms.Form):
@@ -51,7 +53,11 @@ class ImageForm(forms.Form):
         content.seek(0)
         return content
 
+def generate_etag(request, width, height):
+    content = 'Placeholder: {} x {}'.format(width, height)
+    return hashlib.sha1(content.encode('utf-8')).hexdigest()
 
+@etag(generate_etag)
 def placeholder(request, width, height):
     form = ImageForm({'height': height, 'width': width})
     if form.is_valid():
