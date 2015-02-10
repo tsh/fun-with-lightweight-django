@@ -11,6 +11,8 @@ SECRET_KEY = os.environ.get('SECRET_KEY', '1)qydtbzr^@^c9xtvkh+nb3*yshwsz)lyfp7j
 
 ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost').split(',')
 
+BASE_DIR = os.path.dirname(__file__)
+
 settings.configure(
     DEBUG=DEBUG,
     SECRET_KEY=SECRET_KEY,
@@ -21,14 +23,25 @@ settings.configure(
         'django.middleware.csrf.CsrfViewMiddleware',
         'django.middleware.clickjacking.XFrameOptionsMiddleware',
     ),
+    INSTALLED_APPS=(
+        'django.contrib.staticfiles',
+    ),
+    TEMPLATE_DIRS=(
+        os.path.join(BASE_DIR, 'templates'),
+    ),
+    STATICFILES_DIRS=(
+        os.path.join(BASE_DIR, 'static'),
+    ),
+    STATIC_URL='/static/'
 )
 import hashlib
-import os
 from django import forms
 from django.conf.urls import url
 from django.core.cache import cache
+from django.core.urlresolvers import reverse
 from django.core.wsgi import get_wsgi_application
 from django.http import HttpResponse, HttpResponseBadRequest
+from django.shortcuts import render
 from django.views.decorators.http import etag
 
 
@@ -72,9 +85,11 @@ def placeholder(request, width, height):
         return HttpResponseBadRequest('Invalid Image Request')
 
 def index(request):
-    return HttpResponse('Hello World')
-
-
+    example = reverse('placeholder', kwargs={'width': 50, 'height': 50})
+    context = {
+        'example': request.build_absolute_uri(example)
+    }
+    return render(request, 'home.html', context)
 urlpatterns = (
     url(r'^image/(?P<width>[0-9]+)x(?P<height>[0-9]+)/$', placeholder, name='placeholder'),
     url(r'^$', index, name='homepage'),
